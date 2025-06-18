@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fitsSystemWindows="true"
+    tools:context=".AddTaskActivity">
+
+    <!-- App Bar dengan Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary_500"
+        android:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back_white"
+            app:title="Add New Task"
+            app:titleTextColor="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Konten Utama -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:padding="16dp"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Judul Task -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.LifeOrganizer.TextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:startIconDrawable="@drawable/ic_title">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTaskTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Task Title"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapSentences"
+                    android:maxLength="100"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Deskripsi Task -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.LifeOrganizer.TextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:startIconDrawable="@drawable/ic_description">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTaskDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:gravity="top"
+                    android:hint="Description (Optional)"
+                    android:imeOptions="actionDone"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLength="500"
+                    android:scrollbars="vertical" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Prioritas -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Priority"
+                android:textAppearance="@style/TextAppearance.LifeOrganizer.Title"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_priority"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:weightSum="3">
+
+                <!-- Tombol Prioritas Tinggi -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPriorityHigh"
+                    style="@style/Widget.LifeOrganizer.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="High"
+                    android:textColor="@color/priority_high"
+                    app:strokeColor="@color/priority_high"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="16dp" />
+
+                <!-- Tombol Prioritas Sedang -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPriorityMedium"
+                    style="@style/Widget.LifeOrganizer.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Medium"
+                    android:textColor="@color/priority_medium"
+                    app:strokeColor="@color/priority_medium"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="16dp" />
+
+                <!-- Tombol Prioritas Rendah -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPriorityLow"
+                    style="@style/Widget.LifeOrganizer.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Low"
+                    android:textColor="@color/priority_low"
+                    app:strokeColor="@color/priority_low"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="16dp" />
+            </LinearLayout>
+
+            <!-- Kategori -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Category"
+                android:textAppearance="@style/TextAppearance.LifeOrganizer.Title"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_category"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_spinner"
+                android:padding="16dp"/>
+
+            <!-- Deadline -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Deadline"
+                android:textAppearance="@style/TextAppearance.LifeOrganizer.Title"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_calendar"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.LifeOrganizer.TextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_calendar">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDeadline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="Select date" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Tombol Aksi -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:weightSum="2">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCancel"
+                    style="@style/Widget.LifeOrganizer.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="CANCEL"
+                    android:textColor="@color/primary_500"
+                    app:backgroundTint="@color/light_surface"
+                    app:icon="@drawable/ic_close"
+                    app:iconTint="@color/primary_500"
+                    app:strokeColor="@color/primary_500"
+                    app:strokeWidth="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSaveTask"
+                    style="@style/Widget.LifeOrganizer.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="SAVE TASK"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/primary_500"
+                    app:icon="@drawable/ic_save"
+                    app:iconTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progressBarSaving"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

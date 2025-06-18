@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Life Organizer</string>
+    <string name="dashboard_tab">Dashboard</string>
+    <string name="task_tab">Tugas</string>
+    <string name="finance_tab">Keuangan</string>
+    <string name="welcome_back">Selamat Datang Kembali santus dominus!</string>
+    <string name="welcome_message">Anda sedang dalam jalur yang tepat. Mari lanjutkan pencapaian hari ini! 🚀</string>
+    <string name="task_progress_today">Progress Tugas Hari Ini</string>
+    <string name="achievement_today">Pencapaian Hari Ini</string>
+    <string name="completed">Selesai</string>
+    <string name="pending">Menunggu</string>
+    <string name="finance_summary">Ringkasan Keuangan</string>
+    <string name="current_balance">Saldo Saat Ini</string>
+    <string name="income">Pemasukan</string>
+    <string name="expense">Pengeluaran</string>
+    <string name="consecutive_days">Hari Berturut</string>
+    <string name="success_rate">Tingkat Sukses</string>
+    <!-- Tambahkan ini -->
+    <string name="no_tasks_message">📝 Belum ada tugas</string>
+    <string name="add_task_desc">Tombol tambah tugas baru</string>
+
+    <!-- Tambahkan juga untuk error lainnya -->
+    <string name="welcome_icon_desc">Icon selamat datang</string>
+    <string name="task_icon_desc">Icon tugas</string>
+    <string name="transaction_icon_desc">Icon transaksi</string>
+    <string name="success_icon_desc">Icon kesuksesan</string>
+
+    <!-- Untuk hardcoded text lainnya -->
+    <string name="add_task_label">Tambah Tugas</string>
+    <string name="add_expense_label">Catat Pengeluaran</string>
+</resources>

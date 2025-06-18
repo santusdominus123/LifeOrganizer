@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "368850094583",
+    "project_id": "lifeorganizer-ef016",
+    "storage_bucket": "lifeorganizer-ef016.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368850094583:android:a718d09fe1cf33a8fbc6f2",
+        "android_client_info": {
+          "package_name": "com.dataapk.lifeorganizer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLd-TRiwUtmR56v8PgRSLJwrYD8WEFJAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
