@@ -1,54 +1,105 @@
 package com.dataapk.lifeorganizer
 
+import android.content.Context
+import androidx.lifecycle.LiveData
+import com.dataapk.lifeorganizer.data.database.TaskDatabase
+import com.dataapk.lifeorganizer.data.repository.TaskRepository
+import com.dataapk.lifeorganizer.data.model.Task
+import com.dataapk.lifeorganizer.data.model.Priority
+import com.dataapk.lifeorganizer.data.model.Category
+import kotlinx.coroutines.*
+
 object TaskManager {
-    private val tasks = mutableListOf<Task>()
+    private var repository: TaskRepository? = null
     private var taskChangeListener: ((List<Task>) -> Unit)? = null
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun initialize(context: Context) {
+        val database = TaskDatabase.getDatabase(context)
+        repository = TaskRepository(database.taskDao())
+    }
 
     fun setTaskChangeListener(listener: ((List<Task>) -> Unit)?) {
         taskChangeListener = listener
     }
 
+    private fun notifyTaskChange() {
+        scope.launch {
+            val tasks = repository?.getAllTasksList() ?: emptyList()
+            withContext(Dispatchers.Main) {
+                taskChangeListener?.invoke(tasks)
+            }
+        }
+    }
+
+    fun getAllTasksFlow(): LiveData<List<Task>>? = repository?.getAllTasks()
+
     fun addTask(task: Task) {
-        tasks.add(task)
-        taskChangeListener?.invoke(tasks)
-    }
-
-    fun updateTask(id: String, updatedTask: Task) {
-        val index = tasks.indexOfFirst { it.id == id }
-        if (index != -1) {
-            tasks[index] = updatedTask
-            taskChangeListener?.invoke(tasks)
+        scope.launch {
+            repository?.insertTask(task)
+            notifyTaskChange()
         }
     }
 
-    fun deleteTask(id: String) {
-        tasks.removeIf { it.id == id }
-        taskChangeListener?.invoke(tasks)
-    }
-
-    fun toggleTaskCompletion(id: String) {
-        val index = tasks.indexOfFirst { it.id == id }
-        if (index != -1) {
-            val task = tasks[index]
-            tasks[index] = task.copy(isCompleted = !task.isCompleted)
-            taskChangeListener?.invoke(tasks)
+    fun updateTask(updatedTask: Task) {
+        scope.launch {
+            repository?.updateTask(updatedTask)
+            notifyTaskChange()
         }
     }
 
-    fun getAllTasks(): List<Task> = tasks.toList()
-    fun getCompletedTasks(): List<Task> = tasks.filter { it.isCompleted }
-    fun getPendingTasks(): List<Task> = tasks.filter { !it.isCompleted }
-    fun getTasksByCategory(category: Task.Category): List<Task> = tasks.filter { it.category == category }
-    fun getTasksByPriority(priority: Task.Priority): List<Task> = tasks.filter { it.priority == priority }
+    fun deleteTask(task: Task) {
+        scope.launch {
+            repository?.deleteTask(task)
+            notifyTaskChange()
+        }
+    }
 
-    fun getCompletedTaskCount(): Int = tasks.count { it.isCompleted }
-    fun getTaskCount(): Int = tasks.size
-    fun getPendingTaskCount(): Int = tasks.size - getCompletedTaskCount()
-    fun getSuccessRate(): Int = if (tasks.isEmpty()) 0 else (getCompletedTaskCount() * 100 / tasks.size)
+    fun deleteTaskById(id: Long) {
+        scope.launch {
+            repository?.deleteTaskById(id)
+            notifyTaskChange()
+        }
+    }
 
-    fun updateTasksFromFirebase(firebaseTasks: List<Task>) {
-        tasks.clear()
-        tasks.addAll(firebaseTasks)
-        taskChangeListener?.invoke(tasks)
+    fun toggleTaskCompletion(id: Long, isCompleted: Boolean) {
+        scope.launch {
+            repository?.updateTaskStatus(id, isCompleted)
+            notifyTaskChange()
+        }
+    }
+
+    // Synchronous methods for backward compatibility (use with caution)
+    suspend fun getAllTasks(): List<Task> = repository?.getAllTasksList() ?: emptyList()
+    suspend fun getCompletedTasks(): List<Task> = repository?.getCompletedTasks() ?: emptyList()
+    suspend fun getPendingTasks(): List<Task> = repository?.getPendingTasks() ?: emptyList()
+    suspend fun getTasksByCategory(category: Category): List<Task> =
+        withContext(Dispatchers.IO) {
+            // Since Room doesn't provide suspend version for filtered queries by default,
+            // we'll get all tasks and filter them
+            getAllTasks().filter { it.category == category }
+        }
+    suspend fun getTasksByPriority(priority: Priority): List<Task> =
+        withContext(Dispatchers.IO) {
+            getAllTasks().filter { it.priority == priority }
+        }
+
+    suspend fun getCompletedTaskCount(): Int = repository?.getCompletedTaskCountSync() ?: 0
+    suspend fun getTaskCount(): Int = repository?.getTaskCountSync() ?: 0
+    suspend fun getPendingTaskCount(): Int = repository?.getPendingTaskCountSync() ?: 0
+    suspend fun getSuccessRate(): Int = repository?.getSuccessRate() ?: 0
+
+    // LiveData methods for UI observation
+    fun getTasksByPriorityLiveData(priority: Priority): LiveData<List<Task>>? =
+        repository?.getTasksByPriority(priority)
+
+    fun getTasksByStatusLiveData(isCompleted: Boolean): LiveData<List<Task>>? =
+        repository?.getTasksByStatus(isCompleted)
+
+    fun getTasksByCategoryLiveData(category: Category): LiveData<List<Task>>? =
+        repository?.getTasksByCategory(category)
+
+    fun cleanup() {
+        scope.cancel()
     }
 }

@@ -1,34 +1,24 @@
-package com.dataapk.lifeorganizer
+package com.dataapk.lifeorganizer.ui.adapter
 
-import android.graphics.Color
-import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.checkbox.MaterialCheckBox
+import com.dataapk.lifeorganizer.R
+import com.dataapk.lifeorganizer.data.model.Task
+import java.text.SimpleDateFormat
+import java.util.*
 
-class TasksAdapter(
-    private var tasks: MutableList<Task>,
-    private val onTaskToggle: (Task) -> Unit,
-    private val onTaskEdit: (Task) -> Unit,
+class TaskAdapter(
+    private val onTaskClick: (Task) -> Unit,
+    private val onTaskStatusChanged: (Task, Boolean) -> Unit,
     private val onTaskDelete: (Task) -> Unit
-) : RecyclerView.Adapter<TasksAdapter.TaskViewHolder>() {
-
-    inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val checkboxTask: MaterialCheckBox = itemView.findViewById(R.id.checkboxTask)
-        val tvTaskTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
-        val tvTaskDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
-        val tvTaskDeadline: TextView = itemView.findViewById(R.id.tvTaskDeadline)
-        val tvTaskCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
-        val btnEditTask: MaterialButton = itemView.findViewById(R.id.btnEditTask)
-        val btnDeleteTask: MaterialButton = itemView.findViewById(R.id.btnDeleteTask)
-    }
+) : ListAdapter<Task, TaskAdapter.TaskViewHolder>(TaskDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -37,107 +27,67 @@ class TasksAdapter(
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        val task = tasks[position]
-        val context = holder.itemView.context
-
-        // Bind task data
-        holder.tvTaskTitle.text = task.title
-        holder.tvTaskDescription.text = if (task.description.isNotEmpty()) {
-            task.description
-        } else {
-            "No description"
-        }
-        holder.tvTaskDeadline.text = "Due: ${task.deadline}"
-        holder.tvTaskCategory.text = task.category.name
-        holder.checkboxTask.isChecked = task.isCompleted
-
-        // Set priority indicator color
-        val priorityColor = when (task.priority) {
-            Task.Priority.HIGH -> Color.RED
-            Task.Priority.MEDIUM -> Color.parseColor("#FFA500") // Orange
-            Task.Priority.LOW -> Color.GREEN
-        }
-        
+        holder.bind(getItem(position))
     }
 
-    override fun getItemCount(): Int = tasks.size
+    inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
+        private val tvDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
+        private val tvCategory: TextView = itemView.findViewById(R.id.tvCategory)
+        private val tvPriority: TextView = itemView.findViewById(R.id.tvPriority)
+        private val tvDeadline: TextView = itemView.findViewById(R.id.tvDeadline)
+        private val cbCompleted: CheckBox = itemView.findViewById(R.id.cbTaskStatus)
+        private val btnDelete: ImageView = itemView.findViewById(R.id.ivDelete)
+        private val priorityIndicator: View = itemView.findViewById(R.id.vPriorityIndicator)
 
-    fun updateTasks(newTasks: List<Task>) {
-        tasks.clear()
-        tasks.addAll(newTasks)
-        notifyDataSetChanged()
-    }
+        fun bind(task: Task) {
+            tvTitle.text = task.title
+            tvDescription.text = task.description ?: "No description"
+            tvDescription.visibility = if (task.description.isNullOrEmpty()) View.GONE else View.VISIBLE
 
-    fun addTask(task: Task) {
-        tasks.add(0, task) // Add to top
-        notifyItemInserted(0)
-    }
+            tvCategory.text = task.category.name.lowercase().replaceFirstChar { it.uppercase() }
+            tvPriority.text = task.priority.name
 
-    fun removeTask(position: Int) {
-        if (position in 0 until tasks.size) {
-            tasks.removeAt(position)
-            notifyItemRemoved(position)
-            notifyItemRangeChanged(position, tasks.size)
-        }
-    }
-
-    fun updateTask(position: Int, updatedTask: Task) {
-        if (position in 0 until tasks.size) {
-            tasks[position] = updatedTask
-            notifyItemChanged(position)
-        }
-    }
-
-    fun getTaskAt(position: Int): Task? {
-        return if (position in 0 until tasks.size) tasks[position] else null
-    }
-
-    // Filter methods
-    fun filterByCategory(category: Task.Category?) {
-        val filteredTasks = if (category == null) {
-            TaskManager.getAllTasks()
-        } else {
-            TaskManager.getTasksByCategory(category)
-        }
-        updateTasks(filteredTasks)
-    }
-
-    fun filterByPriority(priority: Task.Priority?) {
-        val filteredTasks = if (priority == null) {
-            TaskManager.getAllTasks()
-        } else {
-            TaskManager.getTasksByPriority(priority)
-        }
-        updateTasks(filteredTasks)
-    }
-
-    fun filterByCompletion(showCompleted: Boolean?) {
-        val filteredTasks = when (showCompleted) {
-            true -> TaskManager.getCompletedTasks()
-            false -> TaskManager.getPendingTasks()
-            null -> TaskManager.getAllTasks()
-        }
-        updateTasks(filteredTasks)
-    }
-
-    fun sortByPriority() {
-        tasks.sortBy {
-            when(it.priority) {
-                Task.Priority.HIGH -> 1
-                Task.Priority.MEDIUM -> 2
-                Task.Priority.LOW -> 3
+            // Set priority indicator color
+            val priorityColor = when (task.priority) {
+                com.dataapk.lifeorganizer.data.model.Priority.HIGH ->
+                    itemView.context.getColor(R.color.priority_high)
+                com.dataapk.lifeorganizer.data.model.Priority.MEDIUM ->
+                    itemView.context.getColor(R.color.priority_medium)
+                com.dataapk.lifeorganizer.data.model.Priority.LOW ->
+                    itemView.context.getColor(R.color.priority_low)
             }
+            priorityIndicator.setBackgroundColor(priorityColor)
+
+            // Format deadline
+            task.deadline?.let { deadline ->
+                val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                tvDeadline.text = formatter.format(deadline)
+                tvDeadline.visibility = View.VISIBLE
+            } ?: run {
+                tvDeadline.visibility = View.GONE
+            }
+
+            cbCompleted.isChecked = task.isCompleted
+
+            // Set click listeners
+            itemView.setOnClickListener { onTaskClick(task) }
+
+            cbCompleted.setOnCheckedChangeListener { _, isChecked ->
+                onTaskStatusChanged(task, isChecked)
+            }
+
+            btnDelete.setOnClickListener { onTaskDelete(task) }
         }
-        notifyDataSetChanged()
     }
 
-    fun sortByDeadline() {
-        tasks.sortBy { it.deadline }
-        notifyDataSetChanged()
-    }
+    class TaskDiffCallback : DiffUtil.ItemCallback<Task>() {
+        override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
+            return oldItem.id == newItem.id
+        }
 
-    fun sortByTitle() {
-        tasks.sortBy { it.title.lowercase() }
-        notifyDataSetChanged()
+        override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
+            return oldItem == newItem
+        }
     }
 }

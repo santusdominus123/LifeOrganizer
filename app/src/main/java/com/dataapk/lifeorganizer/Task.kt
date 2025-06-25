@@ -1,17 +1,27 @@
-package com.dataapk.lifeorganizer
+package com.dataapk.lifeorganizer.data.model
 
-import java.io.Serializable
-import java.util.*
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.Date
 
+@Entity(tableName = "tasks")
 data class Task(
-    val id: String = UUID.randomUUID().toString(),
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val title: String,
-    val description: String,
-    val priority: Priority,
-    val category: Category,
-    val deadline: String,
-    var isCompleted: Boolean = false
-) : Serializable {
-    enum class Priority { HIGH, MEDIUM, LOW }
-    enum class Category { WORK, STUDY, PERSONAL, HEALTH }
+    val description: String? = null,
+    val priority: Priority = Priority.MEDIUM,
+    val category: Category = Category.PERSONAL,
+    val isCompleted: Boolean = false,
+    val deadline: Date? = null,
+    val createdAt: Date = Date(),
+    val updatedAt: Date = Date()
+)
+
+enum class Priority {
+    HIGH, MEDIUM, LOW
+}
+
+enum class Category {
+    PERSONAL, WORK, HEALTH, EDUCATION, SHOPPING, OTHER
 }
